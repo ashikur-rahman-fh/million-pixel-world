@@ -11,3 +11,22 @@ services:
       - LOG_FILE_PATH=/var/log/app/frontend.log
       - WATCHPACK_POLLING=true
       - NEXT_TELEMETRY_DISABLED=1
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "8000:8000"
+    environment:
+      - LOG_FILE_PATH=/var/log/app/backend.log
+      - DEBUG=False
+    command: [
+      "sh", "-c",
+      "python manage.py runserver 0.0.0.0:8000 2>&1 | tee -a /var/log/app/backend.log"
+    ]
+
+    volumes:
+      - ./backend:/app
+      - ./logs:/var/log/app

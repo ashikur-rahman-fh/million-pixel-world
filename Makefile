@@ -37,3 +37,12 @@ dev/frontend/logs:
 
 dev/frontend/down:
 	$(DC) down frontend
+
+dev/web-server:
+	$(DC) up -d --build web-server
+
+dev/web-server/logs:
+	$(DC) logs -f web-server
+
+dev/web-server/down:
+	$(DC) down web-server

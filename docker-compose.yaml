@@ -14,9 +14,41 @@ services:
       - ./frontend:/app
       - ./logs:/var/log/app
       - /app/node_modules
-    command: sh -c "npm run dev 2>&1 | tee -a /var/log/app/frontend.log"
+    command: [
+      "sh", "-c",
+      "exec npm run dev 2>&1 | tee -a /var/log/app/frontend.log"
+    ]
+
     logging:
       driver: "local"
       options:
         max-size: "10m"
         max-file: "5"
+
+  web-server:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx:/usr/share/nginx/html:ro
+    restart: unless-stopped
+
+  backend:
+    user: 1000:1000
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    ports:
+      - "8000:8000"
+    environment:
+      - LOG_FILE_PATH=/var/log/app/backend.log
+      - DEBUG=False
+    command: [
+      "sh", "-c",
+      "exec gunicorn pixworld.wsgi:application --workers 3 --no-control-socket --worker-tmp-dir /dev/shm --access-logfile - --error-logfile - --capture-output --enable-stdio-inheritance --log-level info --bind 0.0.0.0:8000 2>&1 | tee -a /var/log/app/backend.log"
+    ]
+
+    volumes:
+      - ./backend:/app
+      - ./logs:/var/log/app

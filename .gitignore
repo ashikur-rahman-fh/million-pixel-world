@@ -40,3 +40,14 @@
 # typescript
 /frontend/*.tsbuildinfo
 /frontend/next-env.d.ts
+
+# Backend
+/backend/.env
+*.sqlite3
+*.db
+
+/backend/pip-log.txt
+
+__pycache__/
+*.py[cod]
+*$py.class
