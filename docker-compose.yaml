@@ -1,0 +1,22 @@
+services:
+  frontend:
+    user: 1000:1000
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: production
+    ports:
+      - "80:80"
+    environment:
+      - NODE_ENV=production
+      - LOG_FILE_PATH=/var/log/app/frontend.log
+    volumes:
+      - ./frontend:/app
+      - ./logs:/var/log/app
+      - /app/node_modules
+    command: sh -c "npm run dev 2>&1 | tee -a /var/log/app/frontend.log"
+    logging:
+      driver: "local"
+      options:
+        max-size: "10m"
+        max-file: "5"
