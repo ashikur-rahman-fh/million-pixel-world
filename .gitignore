@@ -37,6 +37,9 @@
 # vercel
 /frontend/.vercel
 
+# cloudflare
+/frontend/.open-next
+
 # typescript
 /frontend/*.tsbuildinfo
 /frontend/next-env.d.ts
