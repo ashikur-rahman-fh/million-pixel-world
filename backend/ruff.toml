@@ -1,0 +1,31 @@
+target-version = "py312"
+
+line-length = 100
+
+# Files and directories completely ignored by both formatting and linting
+extend-exclude = [
+    "**/migrations/*.py",    # Exclude all Django database migration files
+    "venv",                  # Exclude standard virtual environments
+    ".venv",                 # Exclude local virtual environments
+    "env",                   # Exclude alternative virtual environments
+    ".env",                  # Exclude alternative virtual environments
+    "__pycache__",           # Exclude Python bytecode cache
+    "manage.py",             # Optional: Exclude the Django CLI wrapper script
+    "staticfiles",           # Exclude Django collected static assets
+    "media",                 # Exclude user uploaded media files
+    ".git",                  # Exclude Git system folder
+    "build",                 # Exclude build artifacts
+    "dist",                  # Exclude distribution packages
+]
+
+[lint]
+# Enable Pyflakes (F), Errors (E), Warnings (W), and isort import sorting (I)
+select = ["E", "F", "I", "W"]
+ignore = []
+
+[format]
+quote-style = "double"
+
+indent-style = "space"
+
+line-ending = "auto"
