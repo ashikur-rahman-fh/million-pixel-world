@@ -11,6 +11,7 @@ services:
       - LOG_FILE_PATH=/var/log/app/frontend.log
       - WATCHPACK_POLLING=true
       - NEXT_TELEMETRY_DISABLED=1
+      - NEXT_PUBLIC_BACKEND_API_URL=http://localhost:8000
 
   backend:
     build:

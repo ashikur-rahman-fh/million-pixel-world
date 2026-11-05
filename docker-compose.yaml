@@ -10,10 +10,13 @@ services:
     environment:
       - NODE_ENV=production
       - LOG_FILE_PATH=/var/log/app/frontend.log
+      - NEXT_PUBLIC_BACKEND_API_URL=http://localhost:8000
     volumes:
       - ./frontend:/app
       - ./logs:/var/log/app
       - /app/node_modules
+      - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
+
     command: [
       "sh", "-c",
       "exec npm run dev 2>&1 | tee -a /var/log/app/frontend.log"

@@ -1,14 +1,17 @@
-FROM node:22-alpine AS base
+FROM node:22-slim AS base
 
-WORKDIR app/
+WORKDIR /app
 
-RUN chown -R 1000:1000 /app
-
-COPY package.*json ./
+COPY package*.json ./
 
 FROM base AS development
-USER 1000
+
+RUN chown -R node:node /app
+
+USER node
 
 RUN npm install
-COPY . .
+
+COPY --chown=node:node . .
+
 CMD ["npm", "run", "dev"]
