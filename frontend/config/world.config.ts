@@ -1,9 +1,19 @@
 export const WORLD_CONFIG = {
   cellSize: 10,
-  totalCells: 10_000,
 
-  colors: {
+  chunkSize: 64,
+
+  drawing: {
+    defaultColor: "#ff0000",
+  },
+
+  grid: {
+    color: "#e5e7eb",
+    lineWidth: 1,
+  },
+
+  viewport: {
+    headerHeight: 36,
     background: "#ffffff",
-    grid: "#2f3138",
   },
 } as const;

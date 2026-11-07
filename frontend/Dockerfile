@@ -10,7 +10,7 @@ RUN chown -R node:node /app
 
 USER node
 
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 COPY --chown=node:node . .
 
