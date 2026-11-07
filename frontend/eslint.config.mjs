@@ -18,6 +18,14 @@ const eslintConfig = defineConfig([
       "@stylistic/no-mixed-operators": "error",
       "prefer-template": "error",
       "no-implicit-coercion": "error",
+      // Moved here so it runs on both local dev and production build/lint pipelines
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+        },
+      ],
     },
   },
   ...(isDevelopment
@@ -33,8 +41,6 @@ const eslintConfig = defineConfig([
                 ignoreTemplateLiterals: true,
               },
             ],
-            "no-unused-vars": "warn",
-            "@typescript-eslint/no-unused-vars": "warn",
             "no-console": "warn",
             "no-debugger": "warn",
             "react/no-unescaped-entities": "warn",
