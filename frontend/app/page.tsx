@@ -1,5 +1,6 @@
 "use client";
 
+import { WorldCanvas } from "@/components/world/WorldCanvas";
 import { useApi } from "@/lib/hooks/useApi";
 import { helloService } from "@/services/helloService";
 
@@ -32,10 +33,7 @@ export default function Home() {
 
   return (
     <>
-      <h1 className="text-2xl font-bold">Backend Connection Status</h1>
-      <h2>{helloResponse?.message}</h2>
-      <h2>{helloResponse?.status}</h2>
-      <h2>{helloResponse?.code}</h2>
+      <WorldCanvas />
     </>
   );
 }
