@@ -19,24 +19,55 @@ export class PixelStore {
     return `${chunkX}:${chunkY}`;
   }
 
+  private getLocalIndex(localX: number, localY: number) {
+    // prettier-ignore
+    const localIndex = (localY * WORLD_CONFIG.chunkSize) + localX;
+    return localIndex;
+  }
+
   set(pixel: Pixel): void {
-    if (pixel.x < 0 || pixel.y < 0) return;
+    if (
+      !Number.isSafeInteger(pixel.x) ||
+      !Number.isSafeInteger(pixel.y) ||
+      pixel.x < 0 ||
+      pixel.y < 0
+    ) {
+      return;
+    }
 
     const { chunkX, chunkY, localX, localY } = this.getChunkCoordinates(pixel);
 
-    const chunkKey = this.getChunkKey(chunkX, chunkY);
+    const key = this.getChunkKey(chunkX, chunkY);
 
-    let chunk = this.chunks.get(chunkKey);
+    let chunk = this.chunks.get(key);
 
     if (!chunk) {
       chunk = new Map();
-      this.chunks.set(chunkKey, chunk);
+      this.chunks.set(key, chunk);
     }
 
-    // prettier-ignore
-    const localIndex = (localY * WORLD_CONFIG.chunkSize) + localX;
+    chunk.set(this.getLocalIndex(localX, localY), pixel);
+  }
 
-    chunk.set(localIndex, pixel);
+  delete(position: WorldPosition): boolean {
+    if (position.x < 0 || position.y < 0) {
+      return false;
+    }
+
+    const { chunkX, chunkY, localX, localY } = this.getChunkCoordinates(position);
+
+    const key = this.getChunkKey(chunkX, chunkY);
+    const chunk = this.chunks.get(key);
+
+    if (!chunk) return false;
+
+    const deleted = chunk.delete(this.getLocalIndex(localX, localY));
+
+    if (chunk.size === 0) {
+      this.chunks.delete(key);
+    }
+
+    return deleted;
   }
 
   getVisible(bounds: VisibleWorldBounds): Pixel[] {

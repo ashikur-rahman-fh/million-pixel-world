@@ -2,13 +2,17 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { WORLD_CONFIG } from "@/config/world.config";
 import { screenToWorld } from "@/lib/world/coordinates";
 import { WorldEngine } from "@/lib/world/world-engine";
 
-export function useWorldCanvas() {
+import type { DrawingSettings } from "@/types/world.types";
+
+export function useWorldCanvas(settings: DrawingSettings) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const engineRef = useRef<WorldEngine | null>(null);
+  const settingsRef = useRef(settings);
+
+  // eslint-disable-next-line react-hooks/refs
+  settingsRef.current = settings;
 
   const drawingRef = useRef(false);
   const paintedRef = useRef(new Set<string>());
@@ -22,7 +26,6 @@ export function useWorldCanvas() {
     if (!canvas || !ctx) return;
 
     const engine = new WorldEngine();
-    engineRef.current = engine;
 
     let animationFrame = 0;
 
@@ -30,19 +33,17 @@ export function useWorldCanvas() {
       cancelAnimationFrame(animationFrame);
 
       animationFrame = requestAnimationFrame(() => {
-        if (!canvas || !ctx) return;
-
         const dpr = window.devicePixelRatio || 1;
 
-        const width = canvas.clientWidth;
-        const height = canvas.clientHeight;
+        const width = canvas!.clientWidth;
+        const height = canvas!.clientHeight;
 
         const pixelWidth = Math.round(width * dpr);
         const pixelHeight = Math.round(height * dpr);
 
-        if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
-          canvas.width = pixelWidth;
-          canvas.height = pixelHeight;
+        if (canvas!.width !== pixelWidth || canvas!.height !== pixelHeight) {
+          canvas!.width = pixelWidth;
+          canvas!.height = pixelHeight;
         }
 
         ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -52,10 +53,6 @@ export function useWorldCanvas() {
           height,
         });
       });
-    }
-
-    function updateViewportRow() {
-      setViewportRow(engine.camera.currentRow);
     }
 
     function getWorldPosition(e: PointerEvent) {
@@ -78,7 +75,11 @@ export function useWorldCanvas() {
 
         paintedRef.current.add(key);
 
-        console.log(`Drawn pixel: x=${pixel.x}, y=${pixel.y}`);
+        console.log(
+          settingsRef.current.tool === "eraser"
+            ? `Erased pixel: x=${pixel.x}, y=${pixel.y}`
+            : `Drawn pixel: x=${pixel.x}, y=${pixel.y}`,
+        );
       }
     }
 
@@ -91,8 +92,9 @@ export function useWorldCanvas() {
       canvas!.setPointerCapture(e.pointerId);
 
       const position = getWorldPosition(e);
+      const currentSettings = settingsRef.current;
 
-      const pixels = engine.drawing.start(position, WORLD_CONFIG.drawing.defaultColor);
+      const pixels = engine.drawing.start(position, currentSettings.tool, currentSettings.color);
 
       logPixels(pixels);
       render();
@@ -102,8 +104,9 @@ export function useWorldCanvas() {
       if (!drawingRef.current) return;
 
       const position = getWorldPosition(e);
+      const currentSettings = settingsRef.current;
 
-      const pixels = engine.drawing.move(position, WORLD_CONFIG.drawing.defaultColor);
+      const pixels = engine.drawing.move(position, currentSettings.tool, currentSettings.color);
 
       logPixels(pixels);
       render();
@@ -130,24 +133,21 @@ export function useWorldCanvas() {
 
       engine.camera.scroll(delta);
 
-      updateViewportRow();
+      setViewportRow(engine.camera.currentRow);
       render();
     }
 
-    const resizeObserver = new ResizeObserver(() => {
-      render();
-    });
+    const resizeObserver = new ResizeObserver(render);
 
     canvas.addEventListener("pointerdown", onPointerDown);
     canvas.addEventListener("pointermove", onPointerMove);
     canvas.addEventListener("pointerup", stopDrawing);
     canvas.addEventListener("pointercancel", stopDrawing);
+    canvas.addEventListener("lostpointercapture", stopDrawing);
 
     canvas.addEventListener("wheel", onWheel, {
       passive: false,
     });
-
-    canvas.addEventListener("lostpointercapture", stopDrawing);
 
     resizeObserver.observe(canvas);
 
@@ -161,10 +161,10 @@ export function useWorldCanvas() {
       canvas.removeEventListener("pointermove", onPointerMove);
       canvas.removeEventListener("pointerup", stopDrawing);
       canvas.removeEventListener("pointercancel", stopDrawing);
-      canvas.removeEventListener("wheel", onWheel);
       canvas.removeEventListener("lostpointercapture", stopDrawing);
+      canvas.removeEventListener("wheel", onWheel);
 
-      engineRef.current = null;
+      engine.drawing.end();
     };
   }, []);
 

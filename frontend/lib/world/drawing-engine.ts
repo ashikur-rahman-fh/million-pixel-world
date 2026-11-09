@@ -1,4 +1,5 @@
-import type { Pixel, WorldPosition } from "@/types/world.types";
+import type { DrawingTool, Pixel, WorldPosition } from "@/types/world.types";
+
 import { PixelStore } from "./pixel-store";
 
 export class DrawingEngine {
@@ -6,31 +7,37 @@ export class DrawingEngine {
 
   constructor(private readonly pixelStore: PixelStore) {}
 
-  start(position: WorldPosition, color: string): Pixel[] {
+  start(position: WorldPosition, tool: DrawingTool, color: string): Pixel[] {
     this.previousPosition = position;
 
-    return this.paint(position, color);
+    return this.apply(position, tool, color);
   }
 
-  move(position: WorldPosition, color: string): Pixel[] {
+  move(position: WorldPosition, tool: DrawingTool, color: string): Pixel[] {
     if (!this.previousPosition) {
-      return this.start(position, color);
+      return this.start(position, tool, color);
     }
 
     const points = this.interpolate(this.previousPosition, position);
 
     this.previousPosition = position;
 
-    return points.flatMap((point) => this.paint(point, color));
+    return points.flatMap((point) => this.apply(point, tool, color));
   }
 
   end(): void {
     this.previousPosition = null;
   }
 
-  private paint(position: WorldPosition, color: string): Pixel[] {
+  private apply(position: WorldPosition, tool: DrawingTool, color: string): Pixel[] {
     if (position.x < 0 || position.y < 0) {
       return [];
+    }
+
+    if (tool === "eraser") {
+      const deleted = this.pixelStore.delete(position);
+
+      return deleted ? [{ ...position, color: "transparent" }] : [];
     }
 
     const pixel: Pixel = {

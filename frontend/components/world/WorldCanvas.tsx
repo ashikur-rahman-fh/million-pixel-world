@@ -1,18 +1,34 @@
 "use client";
 
+import { useState } from "react";
+
 import { CanvasSurface } from "./canvas/CanvasSurface";
 import { WorldHeader } from "./WorldHeader";
+import { WorldToolbar } from "./WorldToolbar";
+
 import { useWorldCanvas } from "@/hooks/use-world-canvas";
 
+import type { DrawingSettings } from "@/types/world.types";
+
+const INITIAL_SETTINGS: DrawingSettings = {
+  tool: "pencil",
+  color: "#ff0000",
+};
+
 export function WorldCanvas() {
-  const { canvasRef, viewportRow } = useWorldCanvas();
+  const [settings, setSettings] = useState<DrawingSettings>(INITIAL_SETTINGS);
+
+  const { canvasRef, viewportRow } = useWorldCanvas(settings);
 
   return (
-    <div className="world-container flex-1 relative flex flex-col">
-      <div className="world-viewport relative">
-        <WorldHeader viewportRow={viewportRow} />
+    <main className="world-container">
+      <WorldHeader viewportRow={viewportRow} />
+
+      <div className="world-viewport">
         <CanvasSurface ref={canvasRef} />
+
+        <WorldToolbar settings={settings} onSettingsChange={setSettings} />
       </div>
-    </div>
+    </main>
   );
 }

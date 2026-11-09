@@ -1,3 +1,10 @@
+export type DrawingTool = "pencil" | "eraser";
+
+export interface DrawingSettings {
+  tool: DrawingTool;
+  color: string;
+}
+
 export interface WorldPosition {
   x: number;
   y: number;
